@@ -5,5 +5,9 @@
         <members>CaseFeedItemTriggerHandlerTest</members>
         <name>ApexClass</name>
     </types>
+    <types>
+        <members>CaseFeedItemTrigger</members>
+        <name>ApexTrigger</name>
+    </types>
     <version>56.0</version>
 </Package>

@@ -9,7 +9,7 @@ private class CaseFeedItemTriggerHandlerTest {
         Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
         User testUser = new User(
             Alias = 'testun',
-            Email = 'testuser@example.com' + System.currentTimeMillis() + '@test.com', // Ensure unique email
+            Email = 'testuser_' + System.currentTimeMillis() + '@test.com', // Ensure unique email
             EmailEncodingKey = 'UTF-8',
             LastName = 'TestUser',
             FirstName = 'Test', // Added First Name to have a full name for concatenation
@@ -17,7 +17,7 @@ private class CaseFeedItemTriggerHandlerTest {
             LocaleSidKey = 'en_US',
             ProfileId = p.Id,
             TimeZoneSidKey = 'GMT',
-            UserName = 'testuser' + System.currentTimeMillis() + '@example.com' // Ensure unique username
+            UserName = 'testuser_' + System.currentTimeMillis() + '@example.com' // Ensure unique username
         );
         insert testUser;
         // --- Test user created ---
@@ -66,7 +66,7 @@ private class CaseFeedItemTriggerHandlerTest {
         Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
         User testUser = new User(
             Alias = 'testdl',
-            Email = 'testuser_delete@example.com' + System.currentTimeMillis() + '@test.com',
+            Email = 'testuser_delete_' + System.currentTimeMillis() + '@test.com',
             EmailEncodingKey = 'UTF-8',
             LastName = 'TestUserDL',
             FirstName = 'TestDL',
@@ -74,7 +74,7 @@ private class CaseFeedItemTriggerHandlerTest {
             LocaleSidKey = 'en_US',
             ProfileId = p.Id,
             TimeZoneSidKey = 'GMT',
-            UserName = 'testuser_delete' + System.currentTimeMillis() + '@example.com'
+            UserName = 'testuser_delete_' + System.currentTimeMillis() + '@example.com'
         );
         insert testUser;
         // --- Test user created ---
@@ -136,7 +136,7 @@ private class CaseFeedItemTriggerHandlerTest {
         Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
         User testUser = new User(
             Alias = 'testda',
-            Email = 'testuser_all@example.com' + System.currentTimeMillis() + '@test.com',
+            Email = 'testuser_all_' + System.currentTimeMillis() + '@test.com',
             EmailEncodingKey = 'UTF-8',
             LastName = 'TestUserDA',
             FirstName = 'TestDA',
@@ -144,7 +144,7 @@ private class CaseFeedItemTriggerHandlerTest {
             LocaleSidKey = 'en_US',
             ProfileId = p.Id,
             TimeZoneSidKey = 'GMT',
-            UserName = 'testuser_all' + System.currentTimeMillis() + '@example.com'
+            UserName = 'testuser_all_' + System.currentTimeMillis() + '@example.com'
         );
 
         insert testUser;
@@ -190,7 +190,7 @@ private class CaseFeedItemTriggerHandlerTest {
         Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
         User testUser = new User(
             Alias = 'testau',
-            Email = 'testuser_update@example.com' + System.currentTimeMillis() + '@test.com',
+            Email = 'testuser_update_' + System.currentTimeMillis() + '@test.com',
             EmailEncodingKey = 'UTF-8',
             LastName = 'TestUserAU',
             FirstName = 'TestAU',
@@ -198,7 +198,7 @@ private class CaseFeedItemTriggerHandlerTest {
             LocaleSidKey = 'en_US',
             ProfileId = p.Id,
             TimeZoneSidKey = 'GMT',
-            UserName = 'testuser_update' + System.currentTimeMillis() + '@example.com'
+            UserName = 'testuser_update_' + System.currentTimeMillis() + '@example.com'
         );
         insert testUser;
         // --- Test user created ---
