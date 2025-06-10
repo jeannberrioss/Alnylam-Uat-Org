@@ -67,7 +67,7 @@ public class CaseFeedItemTriggerHandler {
                                         ? latestFi.CreatedBy.Name // Get the name of the user who posted
                                         : 'Unknown User'; // Get full name, default if null
                  
-                    String postedDate = latestFi.CreatedDate.format('MM/dd/yy'); // Retrieve the latest post date in 'dd/MM/yy' format
+                    String postedDate = latestFi.CreatedDate.format('MM/dd/yy'); // Retrieve the latest post date in 'MM/dd/yy' format
                     String newPostDetails = postedByUserName + ' ' + postedDate; // Combine user name and date as required in this new feature
 
                     if (cs.Latest_Chatter_Post__c != plainText || cs.Latest_Chatter_Post_Details__c != newPostDetails) {
@@ -163,7 +163,7 @@ public class CaseFeedItemTriggerHandler {
                                         ? latestFi.CreatedBy.Name // Get the name of the user who posted
                                         : 'Unknown User'; // If null, default to 'Unknown User'
                                         
-                    String postedDate = latestFi.CreatedDate.format('MM/dd/yy'); // Retrieve the latest post date in 'dd/MM/yy' format
+                    String postedDate = latestFi.CreatedDate.format('MM/dd/yy'); // Retrieve the latest post date in 'MM/dd/yy' format
                     String newPostDetails = postedByUserName + ' ' + postedDate; // Combine user name and date as required in this new feature
                     
                     if (cs.Latest_Chatter_Post__c != plainText || cs.Latest_Chatter_Post_Details__c != newPostDetails) {
