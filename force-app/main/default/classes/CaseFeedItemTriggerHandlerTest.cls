@@ -22,19 +22,23 @@ private class CaseFeedItemTriggerHandlerTest {
         insert testUser;
         // --- Test user created ---
 
+        Case case1; 
+        Trial_Participant_Request__c Form1;
+        FeedItem fi1;
+
         Test.startTest();
 
         System.RunAs(testUser) {
             
-        Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
+        case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
        
-        Trial_Participant_Request__c Form1 = new Trial_Participant_Request__c();
+        Form1 = new Trial_Participant_Request__c();
         Form1.Birth_Month_and_Year__c = '08/1999';
         Form1.Case__c = case1.Id;
         insert Form1;
         
-        FeedItem fi1 = new FeedItem(
+            fi1 = new FeedItem(
             ParentId = case1.Id,
             Body = '<b>This is the first post</b>',
             Type = 'TextPost'
@@ -75,20 +79,25 @@ private class CaseFeedItemTriggerHandlerTest {
         insert testUser;
         // --- Test user created ---
 
+        Case case1;
+        Trial_Participant_Request__c Form1;
+        FeedItem fi1;
+        FeedItem fi2;
+
         Test.startTest();
 
         System.RunAs(testUser) {
 
-        Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
+        case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
         
-        Trial_Participant_Request__c Form1 = new Trial_Participant_Request__c();
+        Form1 = new Trial_Participant_Request__c();
         Form1.Birth_Month_and_Year__c = '08/1999';
         Form1.Case__c = case1.Id;
         insert Form1;
         
        
-        FeedItem fi1 = new FeedItem(
+            fi1 = new FeedItem(
             ParentId = case1.Id,
             Body = '<b>This is the first post</b>',
             Type = 'TextPost'
@@ -96,7 +105,7 @@ private class CaseFeedItemTriggerHandlerTest {
 
         insert fi1;
 
-        FeedItem fi2 = new FeedItem(
+            fi2 = new FeedItem(
             ParentId = case1.Id,
             Body = '<i>This is the latest post</i>',
             Type = 'TextPost'
@@ -140,20 +149,24 @@ private class CaseFeedItemTriggerHandlerTest {
 
         insert testUser;
         // --- Test user created ---
+
+        Case case1;
+        Trial_Participant_Request__c Form1;
+        FeedItem fi;
         
         Test.startTest();
 
         System.RunAs(testUser) {
 
-        Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
+        case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
         
-        Trial_Participant_Request__c Form1 = new Trial_Participant_Request__c();
+        Form1 = new Trial_Participant_Request__c();
         Form1.Birth_Month_and_Year__c = '08/1999';
         Form1.Case__c = case1.Id;
         insert Form1;
         
-        FeedItem fi = new FeedItem(
+            fi = new FeedItem(
             ParentId = case1.Id,
             Body = 'Only post',
             Type = 'TextPost'
@@ -189,26 +202,31 @@ private class CaseFeedItemTriggerHandlerTest {
         );
         insert testUser;
         // --- Test user created ---
+
+        Case case1;
+        Trial_Participant_Request__c Form1;
+        FeedItem fi;
+        DateTime originalCreatedDate;
         
         Test.startTest();
 
          System.runAs(testUser) {
 
-        Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
+        case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
         
-        Trial_Participant_Request__c Form1 = new Trial_Participant_Request__c();
+        Form1 = new Trial_Participant_Request__c();
         Form1.Birth_Month_and_Year__c = '08/1999';
         Form1.Case__c = case1.Id;
         insert Form1;
 
-        FeedItem fi = new FeedItem(ParentId = case1.Id,
+        fi = new FeedItem(ParentId = case1.Id,
                                    Body = '<p>Initial post</p>', 
                                    Type = 'TextPost');
         
         insert fi;
 
-        DateTime originalCreatedDate = fi.CreatedDate; // Store the original CreatedDate for later comparison
+        originalCreatedDate = fi.CreatedDate; // Store the original CreatedDate for later comparison
 
         fi.Body = '<p>Updated post</p>';
         
