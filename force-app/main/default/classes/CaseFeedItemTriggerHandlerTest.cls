@@ -4,6 +4,28 @@ private class CaseFeedItemTriggerHandlerTest {
     @isTest
     static void testInsertNewTextPost() {
         
+        // --- Creating a dedicated test user ---
+
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
+        User testUser = new User(
+            Alias = 'testun',
+            Email = 'testuser@example.com' + System.currentTimeMillis() + '@test.com', // Ensure unique email
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'TestUser',
+            FirstName = 'Test', // Added First Name to have a full name for concatenation
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'GMT',
+            UserName = 'testuser' + System.currentTimeMillis() + '@example.com' // Ensure unique username
+        );
+        insert testUser;
+        // --- Test user created ---
+
+        Test.startTest();
+
+        System.RunAs(testUser) {
+            
         Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
        
@@ -18,23 +40,44 @@ private class CaseFeedItemTriggerHandlerTest {
             Type = 'TextPost'
         );
 
-        Test.startTest();
         insert fi1;
+    }
         Test.stopTest();
 
         Case fetchedCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
         System.assertEquals('This is the first post', fetchedCase.Latest_Chatter_Post__c);
 
-        String currentUserName = UserInfo.getName(); // Get the current user's name as they are the one 'posting' in the test
-        String formattedDate = System.now().format('dd/MM/yy'); // Get today's date and format it to DD/MM/YY
-        String expectedPostDetails = currentUserName + ' ' + formattedDate; // Expected concatenated string
-
-    System.assertEquals(expectedPostDetails, fetchedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show current user and todays date.'); // Assert that the new field is populated correctly
-
+        String expectedUserName = testUser.Name; // This is correct: Using the name of the user who performed the insert (testUser)
+        String formattedDate = System.now().format('MM/dd/yy'); // Use System.now() as FeedItem.CreatedDate will be current DateTime
+        String expectedPostDetails = expectedUserName + ' ' + formattedDate; 
+    
+        System.assertEquals(expectedPostDetails, fetchedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show test user\'s name and the post date.');
+    
     }
 
     @isTest
     static void testDeleteLatestPost() {
+
+         // Created a dedicated test user ---
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
+        User testUser = new User(
+            Alias = 'testdl',
+            Email = 'testuser_delete@example.com' + System.currentTimeMillis() + '@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'TestUserDL',
+            FirstName = 'TestDL',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'GMT',
+            UserName = 'testuser_delete' + System.currentTimeMillis() + '@example.com'
+        );
+        insert testUser;
+        // --- Test user created ---
+
+        Test.startTest();
+
+        System.RunAs(testUser) {
 
         Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
@@ -60,25 +103,47 @@ private class CaseFeedItemTriggerHandlerTest {
         );
 
         insert fi2;
-       
-        Test.startTest();
         delete fi2;
+
+        }
+
         Test.stopTest();
 
         Case fallbackCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
-        System.assertEquals('This is the first post', fallbackCase.Latest_Chatter_Post__c);
+        System.assertEquals('This is the first post', fallbackCase.Latest_Chatter_Post__c, 'Latest_Chatter_Post__c should fall back to the previous post body (fi1).');
 
     /* The latest remaining post is fi1, so we expect its details */
 
-        String currentUserName = UserInfo.getName(); 
-        String formattedDate = fi1.CreatedDate.format('dd/MM/yy'); // Use fi1's CreatedDate
-        String expectedPostDetails = currentUserName + ' ' + formattedDate; 
-        
-        System.assertEquals(expectedPostDetails, fallbackCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show details of the new latest post after deletion.');
+        String expectedUserName = testUser.Name; // Use the full name of the specific testUser who created fi1
+        String formattedDate = fi1.CreatedDate.format('MM/dd/yy'); // Use fi1's CreatedDate, as it's the actual created date of the remaining latest post
+        String expectedPostDetails = expectedUserName + ' ' + formattedDate; 
+        System.assertEquals(expectedPostDetails, fallbackCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show details of the new latest post (fi1) after deletion.');
     }
 
     @isTest
     static void testDeleteAllPosts() {
+
+       // --- Created a dedicated test user ---
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
+        User testUser = new User(
+            Alias = 'testda',
+            Email = 'testuser_all@example.com' + System.currentTimeMillis() + '@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'TestUserDA',
+            FirstName = 'TestDA',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'GMT',
+            UserName = 'testuser_all' + System.currentTimeMillis() + '@example.com'
+        );
+
+        insert testUser;
+        // --- Test user created ---
+        
+        Test.startTest();
+
+        System.RunAs(testUser) {
 
         Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
@@ -93,11 +158,12 @@ private class CaseFeedItemTriggerHandlerTest {
             Body = 'Only post',
             Type = 'TextPost'
         );
+       
         insert fi;
-
-        
-        Test.startTest();
         delete fi;
+
+        }
+
         Test.stopTest();
 
         Case emptyCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
@@ -107,6 +173,26 @@ private class CaseFeedItemTriggerHandlerTest {
  @isTest
     static void testAfterUpdate() {
           
+        // --- Created a dedicated test user ---
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator'];
+        User testUser = new User(
+            Alias = 'testau',
+            Email = 'testuser_update@example.com' + System.currentTimeMillis() + '@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'TestUserAU',
+            FirstName = 'TestAU',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'GMT',
+            UserName = 'testuser_update' + System.currentTimeMillis() + '@example.com'
+        );
+        insert testUser;
+        // --- Test user created ---
+        
+        Test.startTest();
+
+         System.runAs(testUser) {
 
         Case case1 = new Case(Status = 'Form Submitted', Origin = 'Web');
         insert case1;
@@ -125,18 +211,21 @@ private class CaseFeedItemTriggerHandlerTest {
         DateTime originalCreatedDate = fi.CreatedDate; // Store the original CreatedDate for later comparison
 
         fi.Body = '<p>Updated post</p>';
-        Test.startTest();
+        
         update fi;
+
+         }
+
         Test.stopTest();
 
         Case updatedCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
-        System.assertEquals('Updated post', updatedCase.Latest_Chatter_Post__c);
+        System.assertEquals('Updated post', updatedCase.Latest_Chatter_Post__c,'Latest_Chatter_Post__c should reflect the updated post body');
 
-        String currentUserName = UserInfo.getName(); 
-        String formattedDate = originalCreatedDate.format('dd/MM/yy'); // The CreatedDate of the FeedItem does NOT change on update, so use its original CreatedDate
-        String expectedPostDetails = currentUserName + ' ' + formattedDate; 
+        String expectedUserName = testUser.Name; // Use the full name of the specific testUser who created the FeedItem
+        String formattedDate = originalCreatedDate.format('MM/dd/yy'); // Use the original CreatedDate, as it doesn't change on update
+        String expectedPostDetails = expectedUserName + ' ' + formattedDate; 
         
-        System.assertEquals(expectedPostDetails, updatedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show current user and original post date after update.');
+        System.assertEquals(expectedPostDetails, updatedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show test user\'s name and original post date after update.');
     }
     
     
