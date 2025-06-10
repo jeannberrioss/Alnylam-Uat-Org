@@ -125,10 +125,10 @@ private class CaseFeedItemTriggerHandlerTest {
         Case fallbackCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
         System.assertEquals('This is the first post', fallbackCase.Latest_Chatter_Post__c, 'Latest_Chatter_Post__c should fall back to the previous post body (fi1).');
 
-    /* The latest remaining post is fi1, so we expect its details */
+        FeedItem reQueriedFi1 = [SELECT CreatedDate FROM FeedItem WHERE Id = :fi1.Id]; // Re-query fi1
 
         String expectedUserName = testUser.Name; // Use the full name of the specific testUser who created fi1
-        String formattedDate = fi1.CreatedDate.format('MM/dd/yy'); // Use fi1's CreatedDate, as it's the actual created date of the remaining latest post
+        String formattedDate = reQueriedFi1.CreatedDate.format('MM/dd/yy'); // Use fi1's CreatedDate, as it's the actual created date of the remaining latest post
         String expectedPostDetails = expectedUserName + ' ' + formattedDate; 
         System.assertEquals(expectedPostDetails, fallbackCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show details of the new latest post (fi1) after deletion.');
     }
@@ -245,8 +245,10 @@ private class CaseFeedItemTriggerHandlerTest {
         Case updatedCase = [SELECT Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c FROM Case WHERE Id = :case1.Id];
         System.assertEquals('Updated post', updatedCase.Latest_Chatter_Post__c,'Latest_Chatter_Post__c should reflect the updated post body');
 
+         FeedItem reQueriedFi = [SELECT CreatedDate FROM FeedItem WHERE Id = :fi.Id]; // Re-query fi
+
         String expectedUserName = testUser.Name; // Use the full name of the specific testUser who created the FeedItem
-        String formattedDate = originalCreatedDate.format('MM/dd/yy'); // Use the original CreatedDate, as it doesn't change on update
+        String formattedDate = reQueriedFi.CreatedDate.format('MM/dd/yy'); // Use the original CreatedDate, as it doesn't change on update
         String expectedPostDetails = expectedUserName + ' ' + formattedDate; 
         
         System.assertEquals(expectedPostDetails, updatedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show test user\'s name and original post date after update.');
