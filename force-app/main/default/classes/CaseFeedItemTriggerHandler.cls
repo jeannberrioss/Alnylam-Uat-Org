@@ -1,6 +1,7 @@
 public class CaseFeedItemTriggerHandler {
 
     private static Map<Id, String> previousLatestChatterPosts = new Map<Id, String>(); // Map to store previous values
+    private static Map<Id, String> previousLatestChatterPostDetails = new Map<Id, String>(); // Map to store previous details
 
     public static void beforeInsert(List<FeedItem> newList) {
         // Logic for before insert event will go here
@@ -37,14 +38,14 @@ public class CaseFeedItemTriggerHandler {
 
         if (!parentIds.isEmpty()) {
             List<Case> cases = [
-                SELECT Id, Latest_Chatter_Post__c
+                SELECT Id, Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c
                 FROM Case
                 WHERE Id IN :parentIds
             ];
 
             Map<Id, FeedItem> latestPosts = new Map<Id, FeedItem>();
             for (FeedItem fi : [
-                SELECT ParentId, Body, CreatedDate
+                SELECT ParentId, Body, CreatedDate, CreatedBy.Name
                 FROM FeedItem
                 WHERE ParentId IN :parentIds AND Type = 'TextPost'
                 ORDER BY CreatedDate DESC
@@ -57,18 +58,30 @@ public class CaseFeedItemTriggerHandler {
             List<Case> updates = new List<Case>();
             for (Case cs : cases) {
                 if (latestPosts.containsKey(cs.Id)) {
-                    String latestBody = latestPosts.get(cs.Id).Body;
-                    String plainText = stripHtml(latestBody); // Stripping HTML
-                    if (cs.Latest_Chatter_Post__c != plainText) {
+                    
+                    FeedItem latestFi = latestPosts.get(cs.Id);
+                    String latestBody = latestFi.Body;
+                    String plainText = stripHtml(latestBody);              
+
+                    String postedByUserName = (latestFi.CreatedBy != null && latestFi.CreatedBy.Name != null)
+                                        ? latestFi.CreatedBy.Name // Get the name of the user who posted
+                                        : 'Unknown User'; // Get full name, default if null
+                 
+                    String postedDate = latestFi.CreatedDate.format('dd/MM/yy'); // Retrieve the latest post date in 'dd/MM/yy' format
+                    String newPostDetails = postedByUserName + ' ' + postedDate; // Combine user name and date as required in this new feature
+
+                    if (cs.Latest_Chatter_Post__c != plainText || cs.Latest_Chatter_Post_Details__c != newPostDetails) {
                         updates.add(new Case(
                             Id = cs.Id,
-                            Latest_Chatter_Post__c = plainText
+                            Latest_Chatter_Post__c = plainText,
+                            Latest_Chatter_Post_Details__c = newPostDetails
                         ));
                     }
-                } else if (cs.Latest_Chatter_Post__c != null) {
+                } else if (cs.Latest_Chatter_Post__c != null || cs.Latest_Chatter_Post_Details__c != null) {
                     updates.add(new Case(
                         Id = cs.Id,
-                        Latest_Chatter_Post__c = null
+                        Latest_Chatter_Post__c = null,
+                        Latest_Chatter_Post_Details__c = null
                     ));
                 }
             }
@@ -90,13 +103,14 @@ public class CaseFeedItemTriggerHandler {
 
         if (!parentIds.isEmpty()) {
             List<Case> cases = [
-                SELECT Id, Latest_Chatter_Post__c
+                SELECT Id, Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c
                 FROM Case
                 WHERE Id IN :parentIds
             ];
 
             for (Case cs : cases) {
-                previousLatestChatterPosts.put(cs.Id, cs.Latest_Chatter_Post__c);
+                previousLatestChatterPosts.put(cs.Id, cs.Latest_Chatter_Post__c); // Store previous Latest_Chatter_Post__c
+                previousLatestChatterPostDetails.put(cs.Id, cs.Latest_Chatter_Post_Details__c); // Store previous Latest_Chatter_Post_Details__c
             }
         }
     }
@@ -111,12 +125,14 @@ public class CaseFeedItemTriggerHandler {
         }
     
         if (!parentIds.isEmpty()) {
+
             Map<Id, String> previousPostsMap = previousLatestChatterPosts;
+            Map<Id, String> previousPostDetailsMap = previousLatestChatterPostDetails;
             Map<Id, FeedItem> latestPostsAfterDelete = new Map<Id, FeedItem>();
             List<Case> CasesToUpdate = new List<Case>();
 
             for (FeedItem fi : [
-                SELECT ParentId, Body, CreatedDate
+                SELECT ParentId, Body, CreatedDate, CreatedBy.Name
                 FROM FeedItem
                 WHERE ParentId IN :parentIds AND Type = 'TextPost'
                 ORDER BY CreatedDate DESC
@@ -127,28 +143,45 @@ public class CaseFeedItemTriggerHandler {
             }
 
             List<Case> cases = [
-                SELECT Id, Latest_Chatter_Post__c
+                SELECT Id, Latest_Chatter_Post__c, Latest_Chatter_Post_Details__c
                 FROM Case
                 WHERE Id IN :parentIds
             ];
 
             for (Case cs : cases) {
-                String previousPost = previousPostsMap.get(cs.Id);
+
+                String previousPost = previousPostsMap.get(cs.Id); // Get previous Latest_Chatter_Post__c
+                String previousPostDetails = previousPostDetailsMap.get(cs.Id); // Get previous Latest_Chatter_Post_Details__c
 
                 if (latestPostsAfterDelete.containsKey(cs.Id)) {
-                    String latestBody = latestPostsAfterDelete.get(cs.Id).Body;
-                    String plainText = stripHtml(latestBody); // Stripping HTML
-                    if (cs.Latest_Chatter_Post__c != plainText) {
+
+                    FeedItem latestFi = latestPostsAfterDelete.get(cs.Id); // Get the latest FeedItem after deletion
+                    String latestBody = latestFi.Body; // Retrieve the body of the latest post
+                    String plainText = stripHtml(latestBody); // Strip HTML tags from the body
+
+                    String postedByUserName = (latestFi.CreatedBy != null && latestFi.CreatedBy.Name != null)
+                                        ? latestFi.CreatedBy.Name // Get the name of the user who posted
+                                        : 'Unknown User'; // If null, default to 'Unknown User'
+                                        
+                    String postedDate = latestFi.CreatedDate.format('dd/MM/yy'); // Retrieve the latest post date in 'dd/MM/yy' format
+                    String newPostDetails = postedByUserName + ' ' + postedDate; // Combine user name and date as required in this new feature
+                    
+                    if (cs.Latest_Chatter_Post__c != plainText || cs.Latest_Chatter_Post_Details__c != newPostDetails) {
                         CasesToUpdate.add(new Case(
                             Id = cs.Id,
-                            Latest_Chatter_Post__c = plainText
+                            Latest_Chatter_Post__c = plainText,
+                            Latest_Chatter_Post_Details__c = newPostDetails
                         ));
                     }
+
                 } else {
+                          if (cs.Latest_Chatter_Post__c != null || cs.Latest_Chatter_Post_Details__c != null) {
                     CasesToUpdate.add(new Case(
                         Id = cs.Id,
-                        Latest_Chatter_Post__c = null
+                        Latest_Chatter_Post__c = null,
+                        Latest_Chatter_Post_Details__c = null
                     ));
+                    }
                 }
             }
 
@@ -156,7 +189,9 @@ public class CaseFeedItemTriggerHandler {
                 update CasesToUpdate;
             }
         }
-        previousLatestChatterPosts.clear(); // Clear the map after processing
+
+        previousLatestChatterPosts.clear(); // Clear the map after processing so it doesn't retain old values
+        previousLatestChatterPostDetails.clear(); // Clear the map after processing so it doesn't retain old values
     }
 
     // --- Utility method to strip HTML tags ---
@@ -164,7 +199,4 @@ public class CaseFeedItemTriggerHandler {
         if (String.isBlank(html)) return '';
         return html.replaceAll('<[^>]+>', '');
     }
-    
-
-
 }
