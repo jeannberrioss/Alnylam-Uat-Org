@@ -26,7 +26,7 @@ private class CaseFeedItemTriggerHandlerTest {
         System.assertEquals('This is the first post', fetchedCase.Latest_Chatter_Post__c);
 
         String currentUserName = UserInfo.getName(); // Get the current user's name as they are the one 'posting' in the test
-        String formattedDate = System.today().format('dd/MM/yy'); // Get today's date and format it to DD/MM/YY
+        String formattedDate = System.now().format('dd/MM/yy'); // Get today's date and format it to DD/MM/YY
         String expectedPostDetails = currentUserName + ' ' + formattedDate; // Expected concatenated string
 
     System.assertEquals(expectedPostDetails, fetchedCase.Latest_Chatter_Post_Details__c, 'Latest_Chatter_Post_Details__c should show current user and todays date.'); // Assert that the new field is populated correctly
