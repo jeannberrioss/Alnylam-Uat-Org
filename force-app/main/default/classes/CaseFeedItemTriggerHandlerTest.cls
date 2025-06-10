@@ -22,6 +22,8 @@ private class CaseFeedItemTriggerHandlerTest {
         insert testUser;
         // --- Test user created ---
 
+        testUser = [SELECT Id, Name FROM User WHERE Id = :testUser.Id];
+
         Case case1; 
         Trial_Participant_Request__c Form1;
         FeedItem fi1;
@@ -78,6 +80,8 @@ private class CaseFeedItemTriggerHandlerTest {
         );
         insert testUser;
         // --- Test user created ---
+
+        testUser = [SELECT Id, Name FROM User WHERE Id = :testUser.Id];
 
         Case case1;
         Trial_Participant_Request__c Form1;
@@ -202,6 +206,8 @@ private class CaseFeedItemTriggerHandlerTest {
         );
         insert testUser;
         // --- Test user created ---
+
+        testUser = [SELECT Id, Name FROM User WHERE Id = :testUser.Id];
 
         Case case1;
         Trial_Participant_Request__c Form1;
