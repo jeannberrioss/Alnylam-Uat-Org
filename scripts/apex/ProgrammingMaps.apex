@@ -13,6 +13,7 @@ ThisIsMyMap.put('001xx000003DHPHAA6', 'Account Name 3');
 System.debug(ThisIsMyMap);
 System.debug(ThisIsMyMap.get('001xx000003DHPHAA6'));
 System.debug(ThisIsMyMap.size());
+System.debug(ThisIsMyMap.values()); /// Returns a list of values in the map
 
 String[] myStringArray = new String[]{'Hello', 'World', 'Apex'};
 for (String myString : myStringArray) {
