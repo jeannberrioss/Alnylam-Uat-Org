@@ -22,9 +22,10 @@ for (String myString : myStringArray) {
 }
 
 // I will delcare an array without initializing it
-String[] myUninitializedArray;
+String[] myUninitializedArray = new String[1];
+myUninitializedArray[0] = 'This is a test string';
 
-// I will create a NullPointerException by trying to access an element of the uninitialized array
+/* Try Catch block to handle potential NullPointerException */
 try {
     System.debug(myUninitializedArray[0]);
 } catch (NullPointerException e) {
