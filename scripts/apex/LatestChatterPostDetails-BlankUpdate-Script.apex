@@ -1,14 +1,19 @@
-Set<Id> caseIdsToRecalculate = new Set<Id>();
+List<Id> caseIdsToRecalculate = new List<Id>();
 
-// Query for all Case records where Latest_Chatter_Post_Details__c is currently NULL.
-// Ensure 'Case' is the correct object API Name.
-for (Case c : [SELECT Id FROM Case WHERE Latest_Chatter_Post_Details__c = NULL LIMIT 1000]) {
-    caseIdsToRecalculate.add(c.Id);
+/* Query all relevant Case records (within a safe limit for anonymous apex).
+We cannot filter by Latest_Chatter_Post_Details__c directly in SOQL */
+
+List<Case> allRelevantCases = [SELECT Id, Latest_Chatter_Post_Details__c FROM Case LIMIT 1000]; // Adjust limit if needed for more records
+
+// Manually filter the records in Apex
+for (Case c : allRelevantCases) {
+    if (String.isBlank(c.Latest_Chatter_Post_Details__c)) {
+        caseIdsToRecalculate.add(c.Id);
+    }
 }
 
 if (!caseIdsToRecalculate.isEmpty()) {
     try {
-        // Call the newly added public method in your handler class.
         CaseFeedItemTriggerHandler.recalculateCaseChatterDetailsForIds(caseIdsToRecalculate);
         System.debug('Successfully initiated recalculation for ' + caseIdsToRecalculate.size() + ' Case records.');
     } catch (Exception e) {
