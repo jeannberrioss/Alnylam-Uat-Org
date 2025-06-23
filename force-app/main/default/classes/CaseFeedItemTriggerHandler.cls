@@ -199,4 +199,22 @@ public class CaseFeedItemTriggerHandler {
         if (String.isBlank(html)) return '';
         return html.replaceAll('<[^>]+>', '');
     }
+
+/* --- New Public Static Method for One-Off Data backfill or blank update --- */
+
+public static void recalculateCaseChatterDetailsForIds(Set<Id> caseIds) {
+    if (caseIds == null || caseIds.isEmpty()) {
+        return;
+    }
+
+    List<FeedItem> dummyFeedItems = new List<FeedItem>();
+    for (Id caseId : caseIds) {
+        dummyFeedItems.add(new FeedItem(ParentId = caseId));
+    }
+
+    handleAfterInsertAndUpdate(dummyFeedItems); // Calling my existing private method to perform the actual logic.
+}
+
+/* End of one-off method for data backfill or blank update */
+
 }
