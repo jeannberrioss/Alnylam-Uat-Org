@@ -1,19 +1,19 @@
-List<Id> caseIdsToRecalculate = new List<Id>();
+// Use a Set<Id> to match the method signature
+Set<Id> caseIdsToRecalculate = new Set<Id>();
 
-/* Query all relevant Case records (within a safe limit for anonymous apex).
-We cannot filter by Latest_Chatter_Post_Details__c directly in SOQL */
+/* Query all relevant Case records -- We still cannot filter by Latest_Chatter_Post_Details__c directly in SOQL. */
+List<Case> allRelevantCases = [SELECT Id, Latest_Chatter_Post_Details__c FROM Case LIMIT 1000];
 
-List<Case> allRelevantCases = [SELECT Id, Latest_Chatter_Post_Details__c FROM Case LIMIT 1000]; // Adjust limit if needed for more records
-
-// Manually filter the records in Apex
+// Manually filter the records in Apex for blank/null values
 for (Case c : allRelevantCases) {
     if (String.isBlank(c.Latest_Chatter_Post_Details__c)) {
-        caseIdsToRecalculate.add(c.Id);
+        caseIdsToRecalculate.add(c.Id); // Add to the Set
     }
 }
 
 if (!caseIdsToRecalculate.isEmpty()) {
     try {
+        // Call the method with the correct Set<Id> signature
         CaseFeedItemTriggerHandler.recalculateCaseChatterDetailsForIds(caseIdsToRecalculate);
         System.debug('Successfully initiated recalculation for ' + caseIdsToRecalculate.size() + ' Case records.');
     } catch (Exception e) {
